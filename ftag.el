@@ -70,8 +70,9 @@ This completes filepaths with untracked files, and tags with known tags."
                        (looking-at pattern-2)))
           (string-trim (buffer-substring (match-beginning 1) (match-end 1))))))))
 
-(defvar ftag-last-previewed-file nil
-  "Last file previewed.")
+(make-variable-buffer-local
+ (defvar ftag-last-previewed-file nil
+   "Last file previewed."))
 
 (defvar ftag-async-preview-thread nil
   "The thread on which async file previews are done for performance.")
@@ -128,8 +129,9 @@ This completes filepaths with untracked files, and tags with known tags."
 (defvar ftag-mode-name "ftag"
   "The name of the ftag-mode shown in the mode line.")
 
-(defvar ftag-follow-mode-enabled nil
-  "Indicates whether follow mode is active.")
+(make-variable-buffer-local
+ (defvar ftag-follow-mode-enabled nil
+   "Indicates whether follow mode is active."))
 
 (defun ftag-set-mode-name ()
   "Update the `mode-name' and mode line."
@@ -139,12 +141,14 @@ This completes filepaths with untracked files, and tags with known tags."
     (setq mode-name new-name)
     (force-mode-line-update)))
 
-(defvar current-line-number nil
-  "Tracks the line number of the point.
-This is useful in follow mode.")
+(make-variable-buffer-local
+ (defvar current-line-number nil
+   "Tracks the line number of the point.
+This is useful in follow mode."))
 
-(defvar ftag-line-changed-hook nil
-  "This hook is run when the cursor changes line.")
+(make-variable-buffer-local
+ (defvar ftag-line-changed-hook nil
+   "This hook is run when the cursor changes line."))
 
 (defun ftag-update-line-number ()
   "Update the line number if needed and run the `ftag-line-changed-hook'."
