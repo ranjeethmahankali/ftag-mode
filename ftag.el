@@ -45,12 +45,12 @@
 This completes filepaths with untracked files, and tags with known tags."
   (save-excursion
     (save-match-data
-      (let ((pos (point))
-            (dirpath (or
-                      (file-name-directory
-                       (directory-file-name
-                        (file-name-directory (buffer-file-name))))
-                      (file-name-directory (buffer-file-name)))))
+      (let* ((pos (point))
+             (dirpath (file-name-directory (buffer-file-name)))
+             (parent-dir (or
+                          (file-name-directory
+                           (directory-file-name dirpath))
+                          dirpath)))
         (cond
          ;; Untracked file paths
          ((ftag-under-header "path")
@@ -60,7 +60,7 @@ This completes filepaths with untracked files, and tags with known tags."
          ((ftag-under-header "tags")
           (when (progn (backward-word) (ftag-looking-at "\\(\\<.*\\>\\)" 1 pos))
             (list (match-beginning 1) (match-end 1)
-                  (ftag-tags dirpath)))))))))
+                  (ftag-tags parent-dir)))))))))
 
 (defun ftag-file-at-point ()
   "Get the path of the file at the current point."
