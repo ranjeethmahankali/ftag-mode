@@ -46,7 +46,11 @@ This completes filepaths with untracked files, and tags with known tags."
   (save-excursion
     (save-match-data
       (let ((pos (point))
-            (dirpath (file-name-directory (buffer-file-name))))
+            (dirpath (or
+                      (file-name-directory
+                       (directory-file-name
+                        (file-name-directory (buffer-file-name))))
+                      (file-name-directory (buffer-file-name)))))
         (cond
          ;; Untracked file paths
          ((ftag-under-header "path")
