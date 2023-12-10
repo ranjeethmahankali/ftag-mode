@@ -87,6 +87,15 @@ This completes filepaths with untracked files, and tags with known tags."
     (cond
      ;; Bail out if there is no filepath.
      ((not filepath) nil)
+     ;; Bail out if video file
+     ((let ((fname (downcase filepath)))
+        (or (s-suffix-p  ".avi" fname)
+            (s-suffix-p  ".mp4" fname)
+            (s-suffix-p  ".3gp" fname)
+            (s-suffix-p  ".vob" fname)
+            (s-suffix-p  ".wmv" fname)
+            (s-suffix-p  ".mkv" fname)))
+      (progn (message "Skipping preview of video file.") nil))
      ;; Bail out if a preview for the same file is already queued.
      ((and ftag-async-preview-thread
            (thread-live-p ftag-async-preview-thread)
