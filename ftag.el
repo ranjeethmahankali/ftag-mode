@@ -45,8 +45,12 @@
 This completes filepaths with untracked files, and tags with known tags."
   (save-excursion
     (save-match-data
-      (let ((pos (point))
-            (dirpath (file-name-directory (buffer-file-name))))
+      (let* ((pos (point))
+             (dirpath (file-name-directory (buffer-file-name)))
+             (parent-dir (or
+                          (file-name-directory
+                           (directory-file-name dirpath))
+                          dirpath)))
         (cond
          ;; Untracked file paths
          ((ftag-under-header "path")
@@ -56,7 +60,7 @@ This completes filepaths with untracked files, and tags with known tags."
          ((ftag-under-header "tags")
           (when (progn (backward-word) (ftag-looking-at "\\(\\<.*\\>\\)" 1 pos))
             (list (match-beginning 1) (match-end 1)
-                  (ftag-tags dirpath)))))))))
+                  (ftag-tags parent-dir)))))))))
 
 (defun ftag-file-at-point ()
   "Get the path of the file at the current point."
@@ -70,8 +74,9 @@ This completes filepaths with untracked files, and tags with known tags."
                        (looking-at pattern-2)))
           (string-trim (buffer-substring (match-beginning 1) (match-end 1))))))))
 
-(defvar ftag-last-previewed-file nil
-  "Last file previewed.")
+(make-variable-buffer-local
+ (defvar ftag-last-previewed-file nil
+   "Last file previewed."))
 
 (defvar ftag-async-preview-thread nil
   "The thread on which async file previews are done for performance.")
@@ -87,14 +92,9 @@ This completes filepaths with untracked files, and tags with known tags."
     (cond
      ;; Bail out if there is no filepath.
      ((not filepath) nil)
-     ;; Bail out if video file
-     ((let ((fname (downcase filepath)))
-        (or (s-suffix-p  ".avi" fname)
-            (s-suffix-p  ".mp4" fname)
-            (s-suffix-p  ".3gp" fname)
-            (s-suffix-p  ".vob" fname)
-            (s-suffix-p  ".wmv" fname)
-            (s-suffix-p  ".mkv" fname)))
+     ((let ((exts '(".avi" ".mp4" ".mkv" ".wmv" ".3gp" ".vob"))
+            (fname (downcase filepath)))
+        (-any (lambda (ext) (string-suffix-p ext fname)) exts))
       (progn (message "Skipping preview of video file.") nil))
      ;; Bail out if a preview for the same file is already queued.
      ((and ftag-async-preview-thread
@@ -137,8 +137,9 @@ This completes filepaths with untracked files, and tags with known tags."
 (defvar ftag-mode-name "ftag"
   "The name of the ftag-mode shown in the mode line.")
 
-(defvar ftag-follow-mode-enabled nil
-  "Indicates whether follow mode is active.")
+(make-variable-buffer-local
+ (defvar ftag-follow-mode-enabled nil
+   "Indicates whether follow mode is active."))
 
 (defun ftag-set-mode-name ()
   "Update the `mode-name' and mode line."
@@ -148,12 +149,14 @@ This completes filepaths with untracked files, and tags with known tags."
     (setq mode-name new-name)
     (force-mode-line-update)))
 
-(defvar current-line-number nil
-  "Tracks the line number of the point.
-This is useful in follow mode.")
+(make-variable-buffer-local
+ (defvar current-line-number nil
+   "Tracks the line number of the point.
+This is useful in follow mode."))
 
-(defvar ftag-line-changed-hook nil
-  "This hook is run when the cursor changes line.")
+(make-variable-buffer-local
+ (defvar ftag-line-changed-hook nil
+   "This hook is run when the cursor changes line."))
 
 (defun ftag-update-line-number ()
   "Update the line number if needed and run the `ftag-line-changed-hook'."
