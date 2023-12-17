@@ -81,6 +81,12 @@ This completes filepaths with untracked files, and tags with known tags."
 (defvar ftag-async-preview-thread nil
   "The thread on which async file previews are done for performance.")
 
+(defun my/any (items)
+  "Check if at least one of ITEMS is non-nil."
+  (and items
+       (or (car items)
+           (my/any (cdr items)))))
+
 (defun ftag-preview-file ()
   "Preview the file at point in another window."
   (interactive)
@@ -94,7 +100,7 @@ This completes filepaths with untracked files, and tags with known tags."
      ((not filepath) nil)
      ((let ((exts '(".avi" ".mp4" ".mkv" ".wmv" ".3gp" ".vob"))
             (fname (downcase filepath)))
-        (-any (lambda (ext) (string-suffix-p ext fname)) exts))
+        (my/any (mapcar (lambda (ext) (string-suffix-p ext fname)) exts)))
       (progn (message "Skipping preview of video file.") nil))
      ;; Bail out if a preview for the same file is already queued.
      ((and ftag-async-preview-thread
