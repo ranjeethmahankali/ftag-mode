@@ -126,6 +126,12 @@ This completes filepaths with untracked files, and tags with known tags."
               (make-thread `(lambda ()
                               (display-buffer (find-file-noselect ,filepath))))))))))
 
+(defun ftag-insert-tags ()
+  "Insert an empty tags header at point."
+  (interactive)
+  (insert "[tags]\n\n")
+  (forward-line -1))
+
 (defun ftag-track-untracked-files ()
   "Track all untracked files by inserting them into the current .ftag file."
   (interactive)
@@ -207,6 +213,7 @@ This is useful in follow mode."))
         (p ftag-mode-map-prefix))
     (define-key map (vconcat p [(control c)]) #'ftag-preview-file)
     (define-key map (vconcat p [(control f)]) #'ftag-follow-mode)
+    (define-key map (vconcat p [(control t)]) #'ftag-insert-tags)
     map)
   "Keymap used in `ftag-mode' buffers.")
 
