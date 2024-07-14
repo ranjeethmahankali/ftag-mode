@@ -98,7 +98,7 @@ This completes filepaths with untracked files, and tags with known tags."
     (cond
      ;; Bail out if there is no filepath.
      ((not filepath) nil)
-     ((let ((exts '(".avi" ".mp4" ".mkv" ".wmv" ".3gp" ".vob" ".mov"))
+     ((let ((exts '(".avi" ".mp4" ".mkv" ".wmv" ".3gp" ".vob" ".mov" ".mp3"))
             (fname (downcase filepath)))
         (my/any (mapcar (lambda (ext) (string-suffix-p ext fname)) exts)))
       (progn (message "Skipping preview of video file.") nil))
