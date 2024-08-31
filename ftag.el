@@ -43,11 +43,13 @@
 
 (defun ftag-under-header (name)
   "Check if the point is directly under the NAME header."
-  (and (save-excursion
-         (let ((pattern "^\\[\\(.*\\)\\]"))
-           (and (re-search-backward pattern nil t)
-                (progn (beginning-of-line) (looking-at pattern))
-                (string-equal name (buffer-substring (match-beginning 1) (match-end 1))))))))
+  (save-match-data
+    (save-excursion
+      (let ((pattern "^\\[\\(.*\\)\\]"))
+        (and (or
+              (progn (beginning-of-line) (looking-at pattern))
+              (re-search-backward pattern nil t))
+             (string-equal name (buffer-substring (match-beginning 1) (match-end 1))))))))
 
 (defun ftag-completion-at-point ()
   "Return the completion data relevant for the text at point.
@@ -75,13 +77,20 @@ This completes filepaths with untracked files, and tags with known tags."
   "Get the path of the file at the current point."
   (save-excursion
     (save-match-data
-      (let ((pattern-1 "^\\[path\\]")
-            (pattern-2 "^\\[path\\][\n\s]*\\(.*\\)\n"))
+      (let* ((under-path (ftag-under-header "path"))
+             (current-line (string-trim (thing-at-point 'line t)))
+             (pattern-1 "^\\[path\\]")
+             (pattern-2 "^\\[path\\][\n\s]*\\(.*\\)\n"))
         (beginning-of-line)
         (when (or (looking-at pattern-2)
                   (and (re-search-backward pattern-1 nil t)
                        (looking-at pattern-2)))
-          (string-trim (buffer-substring (match-beginning 1) (match-end 1))))))))
+          (or
+           (when (and under-path (> (length current-line) 0)
+                      (not (string-equal current-line "[path]"))) ;; If the cursor is on one of the paths, preview that file.
+             current-line)
+           ;; Otherwise return the first path under the path header.
+           (string-trim (buffer-substring (match-beginning 1) (match-end 1)))))))))
 
 (make-variable-buffer-local
  (defvar ftag-last-previewed-file nil
