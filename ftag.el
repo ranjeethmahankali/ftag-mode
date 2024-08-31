@@ -25,12 +25,21 @@
      ;; Remove newlines and white spaces before splitting.
      (string-trim (shell-command-to-string "ftag untracked")) "\n")))
 
+(make-variable-buffer-local (defvar ftag-tags-cache nil
+  "List of tags of the parent directory."))
+
 (defun ftag-tags (dir)
   "Get all tags for documents in the DIR directory."
-  (let ((default-directory dir))
-    (split-string
-     ;; Remove newlines and white spaces before splitting.
-     (string-trim (shell-command-to-string "ftag tags")) "\n")))
+  (or ftag-tags-cache
+      (setq ftag-tags-cache
+            (let ((default-directory dir))
+              (split-string
+               ;; Remove newlines and white spaces before splitting.
+               (string-trim (shell-command-to-string "ftag tags")) "\n")))))
+
+(defun ftag-invalidate-tags-cache ()
+  "Set the cached list of tags to nil.  This will cause them to be queried again."
+  (setq ftag-tags-cache nil))
 
 (defun ftag-under-header (name)
   "Check if the point is directly under the NAME header."
@@ -177,8 +186,6 @@ This is useful in follow mode."))
       (setq current-line-number new-line-num)
       (run-hooks 'ftag-line-changed-hook))))
 
-(add-hook 'post-command-hook #'ftag-update-line-number)
-
 (defun ftag-follow-mode ()
   "Toggle follow mode."
   (interactive)
@@ -225,6 +232,8 @@ This is useful in follow mode."))
   "Simple mode for editing .ftag files.
 \\{ftag-mode-map}"
   (add-hook 'completion-at-point-functions #'ftag-completion-at-point 0 t)
+  (add-hook 'after-save-hook #'ftag-invalidate-tags-cache nil t)
+  (add-hook 'post-command-hook #'ftag-update-line-number)
   (setq font-lock-defaults '(ftag-font-lock-keywords)))
 
 ;;;###autoload
