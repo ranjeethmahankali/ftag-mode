@@ -144,6 +144,14 @@ This completes filepaths with untracked files, and tags with known tags."
               (make-thread `(lambda ()
                               (display-buffer (find-file-noselect ,filepath))))))))))
 
+(defun ftag-open-file-at-point ()
+  "Open the file at point in the default program."
+  (interactive)
+  (let* ((folder (file-name-directory (buffer-file-name)))
+         (filepath (concat folder (ftag-file-at-point))))
+    (let ((cmd (if (using-windows) "explorer" "xdg-open")))
+      (shell-command (concat cmd " \"" filepath "\"")))))
+
 (defun ftag-insert-tags ()
   "Insert an empty tags header at point."
   (interactive)
@@ -230,6 +238,7 @@ This is useful in follow mode."))
     (define-key map (vconcat p [(control c)]) #'ftag-preview-file)
     (define-key map (vconcat p [(control f)]) #'ftag-follow-mode)
     (define-key map (vconcat p [(control t)]) #'ftag-insert-tags)
+    (define-key map (vconcat p [(control o)]) #'ftag-open-file-at-point)
     map)
   "Keymap used in `ftag-mode' buffers.")
 
