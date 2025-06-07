@@ -149,7 +149,9 @@ This completes filepaths with untracked files, and tags with known tags."
   (interactive)
   (let* ((folder (file-name-directory (buffer-file-name)))
          (filepath (concat folder (ftag-file-at-point))))
-    (let ((cmd (if (using-windows) "explorer" "xdg-open")))
+    (let ((cmd (cond ((using-windows) "explorer")
+                     ((using-macos) "open")
+                     (t "xdg-open"))))
       (shell-command (concat cmd " \"" filepath "\"")))))
 
 (defun ftag-insert-tags ()
