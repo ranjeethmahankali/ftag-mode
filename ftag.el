@@ -259,7 +259,7 @@ This is useful in follow mode."))
 ;;;###autoload
 (add-to-list 'auto-mode-alist '("\\.ftag$" . ftag-mode))
 
-(add-hook 'ftag-mode-hook 'company-mode)
+(add-hook 'ftag-mode-hook 'corfu-mode)
 
 (provide 'ftag)
 ;;; ftag.el ends here
